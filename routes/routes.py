@@ -35,21 +35,23 @@ async def upload(file: UploadFile = File(...), titulo: str = Form(...)):
     print(f"Tamanho do arquivo: {file_size} bytes")
 
     # Fazer upload
-    response = "xxx"  # bucket.upload_file(file_content)
+    result = bucket.upload_file(file_content, file.filename, titulo)
 
-    if not response:
+    if result["success"]:
+        return {
+            "status": 200,
+            "message": f"Arquivo {file.filename} processado com sucesso",
+            "result": result
+        }
+    else:
         return JSONResponse(
             status_code=500,
-            content={"status": 500, "message": "Erro ao fazer upload do arquivo"}
+            content={
+                "status": 500,
+                "message": "Erro ao processar o arquivo",
+                "error": result.get("error", "Erro desconhecido")
+            }
         )
-
-    return {
-        "status": 200,
-        "message": f"Arquivo {file.filename} enviado com sucesso",
-        "file_id": str(response),
-        "file_size": file_size,
-        "titulo": titulo
-    }
 
 # @router.post("/salvar")
 # async def salvar(rag_request: schemas.RAGRequest):
