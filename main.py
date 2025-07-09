@@ -1,13 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from routes import routes
+
 
 app = FastAPI()
 
+origins = [
+    "*",
+]
 
-@app.get("/")
-async def read_root():
-    return {"message": "Olá, FastAPI!"}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+app.include_router(routes.router)
