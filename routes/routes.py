@@ -1,13 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import JSONResponse
-from services import bucket
+from services.processa_arquivos import processa_arquivos
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/ok")
 async def root():
-    return {"message": "Server is running"}
+    return {"status": 200, "message": "Server is running"}
 
 
 @router.post("/upload")
@@ -35,7 +35,7 @@ async def upload(file: UploadFile = File(...), titulo: str = Form(...)):
     print(f"Tamanho do arquivo: {file_size} bytes")
 
     # Fazer upload
-    result = bucket.upload_file(file_content, file.filename, titulo)
+    result = processa_arquivos(file_content, file.filename, titulo)
 
     if result["success"]:
         return {
@@ -52,8 +52,3 @@ async def upload(file: UploadFile = File(...), titulo: str = Form(...)):
                 "error": result.get("error", "Erro desconhecido")
             }
         )
-
-# @router.post("/salvar")
-# async def salvar(rag_request: schemas.RAGRequest):
-#    dynamodb.salvar_rag(rag_request)
-#    return {"status": 200}
