@@ -3,6 +3,9 @@ import fitz  # PyMuPDF
 import tempfile
 from uuid import uuid4
 
+from services.textract.textract import processar_arquivos_png
+
+
 # Diretório de saída para arquivos processados
 path_output = "data"
 
@@ -71,7 +74,13 @@ def processa_arquivos(file_content: bytes, filename: str, titulo: str = None):
         print(
             f"Processamento concluído: {len(arquivos_png_gerados)} imagens geradas")
 
-        compactar_imagens_geradas(arquivos_png_gerados, output_folder)
+        # Processar com Textract
+        print("Iniciando análise com AWS Textract...")
+        textract_resultado = processar_arquivos_png(arquivos_png_gerados)
+
+        # Compactar imagens (opcional)
+        zip_path = compactar_imagens_geradas(
+            arquivos_png_gerados, output_folder)
 
         return {
             "success": True,
@@ -79,7 +88,10 @@ def processa_arquivos(file_content: bytes, filename: str, titulo: str = None):
             "filename": filename,
             "titulo": titulo,
             "pages_processed": pages_processed,
-            "total_pages": doc.page_count
+            "total_pages": doc.page_count,
+            "arquivos_png": arquivos_png_gerados,
+            "zip_path": zip_path,
+            "textract_result": textract_resultado
         }
 
     except Exception as e:
