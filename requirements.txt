@@ -1,4 +1,3 @@
-Requerimentos
 fastapi==0.116.0
 uvicorn[standard]
 python-multipart
