@@ -73,13 +73,22 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
                     # print("\n=== EXTRAINDO DADOS DA TABELA DE SEGUROS ===")
 
                     # Extrai dados no formato solicitado
-                    insurance_data = extract_insurance_table_data(response)
+                    insurance_data_raw = extract_insurance_table_data(response)
+
+                    # Filtrar apenas objetos que contêm "R$" na propriedade "Prêmio Líquido"
+                    insurance_data = []
+                    for item in insurance_data_raw:
+                        if isinstance(item, dict) and "Prêmio Líquido" in item:
+                            premio_liquido = str(item["Prêmio Líquido"])
+                            if "R$" in premio_liquido:
+                                insurance_data.append(item)
 
                     # print(f"Encontrados {len(insurance_data)} itens da tabela de seguros")
 
                     # Exibe o resultado no formato JSON solicitado
                     print("\n=== RESULTADO NO FORMATO SOLICITADO ===")
                     print(json.dumps(insurance_data, indent=2, ensure_ascii=False))
+                    resultados.append(insurance_data)
 
                     # === PROCESSAMENTO ORIGINAL (para comparação) ===
                     # print("\n=== PROCESSAMENTO ORIGINAL (para comparação) ===")
@@ -106,6 +115,7 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
 
                     # Converter string JSON de volta para objeto Python
                     resultado_objeto = json.loads(json_resultado)
+                    insurance_data.append(resultado_objeto)
                     resultados.append(resultado_objeto)
 
             except Exception as e:
@@ -114,12 +124,8 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
         # Exibir resultados consolidados
         print("\n=== RESULTADOS CONSOLIDADOS ===")
         if resultados:
-            # Se há apenas um resultado, mostrar diretamente
-            if len(resultados) == 1:
-                print(json.dumps(resultados[0], indent=2, ensure_ascii=False))
-            else:
-                # Se há múltiplos resultados, mostrar como array
-                print(json.dumps(resultados, indent=2, ensure_ascii=False))
+            # Se há múltiplos resultados, mostrar como array
+            print(json.dumps(resultados, indent=2, ensure_ascii=False))
 
         # Retornar resultado consolidado
         return {
