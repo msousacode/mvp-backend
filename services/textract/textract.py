@@ -10,6 +10,7 @@ from .parser import (
     # find_multiple_keywords,  # Nova função para buscar múltiplas keywords
     # get_block_coordinates  # Nova função para coordenadas
 )
+from utils.montar_json import montar_json
 
 
 def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] = None) -> Dict[str, Any]:
@@ -69,13 +70,12 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
                     word_map = map_word_id(response)
 
                     # === EXTRAÇÃO DE DADOS DA TABELA DE SEGUROS ===
-                    print("\n=== EXTRAINDO DADOS DA TABELA DE SEGUROS ===")
+                    # print("\n=== EXTRAINDO DADOS DA TABELA DE SEGUROS ===")
 
                     # Extrai dados no formato solicitado
                     insurance_data = extract_insurance_table_data(response)
 
-                    print(
-                        f"Encontrados {len(insurance_data)} itens da tabela de seguros")
+                    # print(f"Encontrados {len(insurance_data)} itens da tabela de seguros")
 
                     # Exibe o resultado no formato JSON solicitado
                     print("\n=== RESULTADO NO FORMATO SOLICITADO ===")
@@ -85,15 +85,35 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
                     # print("\n=== PROCESSAMENTO ORIGINAL (para comparação) ===")
 
                     # Passa as palavras chaves e os valores chaves para formar um objeto chave-valor.
-                    # final_map = get_kv_map(response, word_map)
+                    final_map = get_kv_map(response, word_map)
+
+                    # TODO Essas chaves devem ser dinâmicas, baseadas no conteúdo do PDF
+                    keys = [
+                        'N° Cotação',
+                        'Vigência',
+                        'N° Proposta/Negócio',
+                        'Tipo Seguro',
+                        'Empresa Parceira',
+                        'Deseja contratar cobertura do seguro para condutores na faixa etária de 18 a 25 anos que residem com O Principal Condutor?'
+                    ]
 
                     # Print do JSON formatado de forma legível
-                    # print("JSON dos pares chave-valor (método tradicional):")
-                    # print(json.dumps(final_map, indent=2, ensure_ascii=False))
+                    print("\n\n=== JSON dos pares chave-valor (método tradicional):")
+                    json_resultado = montar_json(keys, final_map)
+
+                    print(f"\n=== RESULTADOS PARCIAIS ===")
+                    print(json_resultado)
 
             except Exception as e:
-                print(f"Erro geral no processamento: {e}")
-                return {
+                print(f"Erro ao processar {arquivo_png}: {e}")
+                resultados.append({
+                    "arquivo": os.path.basename(arquivo_png),
+                    "page_number": i + 1,
                     "success": False,
-                    "error": f"Erro no processamento: {str(e)}"
-                }
+                    "error": str(e)
+                })
+
+        # Retornar resultado consolidado
+        return {
+            "success": True,
+        }
