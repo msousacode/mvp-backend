@@ -86,6 +86,8 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
 
                     # Passa as palavras chaves e os valores chaves para formar um objeto chave-valor.
                     final_map = get_kv_map(response, word_map)
+                    # print("\n=== FINAL MAP ===")
+                    # print(json.dumps(final_map, indent=2, ensure_ascii=False))
 
                     # TODO Essas chaves devem ser dinâmicas, baseadas no conteúdo do PDF
                     keys = [
@@ -94,6 +96,7 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
                         'N° Proposta/Negócio',
                         'Tipo Seguro',
                         'Empresa Parceira',
+                        'Processo SUSEP n°',
                         'Deseja contratar cobertura do seguro para condutores na faixa etária de 18 a 25 anos que residem com O Principal Condutor?'
                     ]
 
