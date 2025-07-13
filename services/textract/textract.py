@@ -104,19 +104,26 @@ def processar_arquivos_png(arquivos_png: List[str], aws_config: Dict[str, str] =
                     print("\n\n=== JSON dos pares chave-valor (método tradicional):")
                     json_resultado = montar_json(keys, final_map)
 
-                    print(f"\n=== RESULTADOS PARCIAIS ===")
-                    print(json_resultado)
+                    # Converter string JSON de volta para objeto Python
+                    resultado_objeto = json.loads(json_resultado)
+                    resultados.append(resultado_objeto)
 
             except Exception as e:
                 print(f"Erro ao processar {arquivo_png}: {e}")
-                resultados.append({
-                    "arquivo": os.path.basename(arquivo_png),
-                    "page_number": i + 1,
-                    "success": False,
-                    "error": str(e)
-                })
+
+        # Exibir resultados consolidados
+        print("\n=== RESULTADOS CONSOLIDADOS ===")
+        if resultados:
+            # Se há apenas um resultado, mostrar diretamente
+            if len(resultados) == 1:
+                print(json.dumps(resultados[0], indent=2, ensure_ascii=False))
+            else:
+                # Se há múltiplos resultados, mostrar como array
+                print(json.dumps(resultados, indent=2, ensure_ascii=False))
 
         # Retornar resultado consolidado
         return {
             "success": True,
+            "total_arquivos": len(arquivos_png),
+            "resultados": resultados
         }
